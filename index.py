@@ -33,6 +33,11 @@ def linhas():
             color = tuple(map(lambda x: int(x), np.random.randint(0,255,size=3)))
             cv2.line(mario,corner1,corner2,color,1)
 
+def moveMouse(loc):
+    x,y = loc
+
+    pyautogui.moveTo(x, y)
+
 def find_image_position(gray_b):
     # TESTAR MAIS
     if gray_b.dtype != np.uint8:
@@ -144,9 +149,42 @@ def tela():
         if cv2.waitKey(1) == ord('q'):
             break
 
-def moveMouse(loc):
-    x,y = loc
 
-    pyautogui.moveTo(x, y)
+def verificar_imagem_contida(imagem_principal, imagem_procurada):
+    # Carrega as imagens
+    img_principal = cv2.imread(imagem_principal, cv2.IMREAD_GRAYSCALE)
+    print(img_principal.shape)
+    img_procurada = cv2.imread(imagem_procurada, cv2.IMREAD_GRAYSCALE)
+    print(img_procurada.shape)
+    return
+    # Inicializa o detector ORB
+    orb = cv2.ORB_create()
 
+    # Detecta e computa as características das duas imagens
+    kp1, des1 = orb.detectAndCompute(img_principal, None)
+    kp2, des2 = orb.detectAndCompute(img_procurada, None)
+
+    # Inicializa o matcher de correspondência de características
+    bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+
+    # Encontra as correspondências das características
+    matches = bf.match(des1, des2)
+
+    # Ordena as correspondências por distância
+    matches = sorted(matches, key=lambda x: x.distance)
+
+    # Verifica se há correspondências suficientes para considerar a imagem como contida
+    if len(matches) > 10:
+        return True
+    else:
+        return False
+
+# Exemplo de uso
+imagem_principal = 'assets/mario.jpg'
+imagem_procurada = 'assets/marioName.jpg'
+
+if verificar_imagem_contida(imagem_principal, imagem_procurada):
+    print("A imagem procurada está contida na imagem principal.")
+else:
+    print("A imagem procurada não está contida na imagem principal.")
     
