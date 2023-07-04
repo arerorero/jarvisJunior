@@ -4,6 +4,7 @@ import mysql.connector
 import pyautogui
 import subprocess
 
+
 def installAll():
     installs = [
     'pip install numpy',
@@ -32,13 +33,40 @@ def linhas():
             color = tuple(map(lambda x: int(x), np.random.randint(0,255,size=3)))
             cv2.line(mario,corner1,corner2,color,1)
 
+def find_image_position(gray_b):
+    # TESTAR MAIS
+    if gray_b.dtype != np.uint8:
+        gray_b = gray_b.astype(np.uint8)
+    if gray_b.ndim >= 2:
+        gray_b = cv2.cvtColor(gray_b, cv2.COLOR_BGR2GRAY)
+    # Convert as imagens para escala de cinza
+    gray_a = cv2.imread('assets/mario.jpg',0)
+
+    # Aplica o método de correspondência
+    result = cv2.matchTemplate(gray_b, gray_a, cv2.TM_CCOEFF_NORMED)
+
+    # Define um limite para considerar uma correspondência
+    threshold = 0.01
+
+    # Encontra as correspondências acima do limite
+    locations = np.where(result >= threshold)
+
+    if locations[0].size > 0 and locations[1].size > 0:
+        # Encontrou uma correspondência
+        top_left = (locations[1][0], locations[0][0])
+        bottom_right = (top_left[0] + gray_a.shape[1], top_left[1] + gray_a.shape[0])
+        return top_left, bottom_right
+    else:
+        # Não encontrou correspondência
+        return None
+    
 def detecImg():
         
     methods = [cv2.TM_SQDIFF,cv2.TM_SQDIFF_NORMED,cv2.TM_CCORR,
                 cv2.TM_CCORR_NORMED,cv2.TM_CCOEFF,cv2.TM_CCOEFF_NORMED]
 
-    mario64 = cv2.imread('assets/mario.jpg')
-    mario = cv2.imread('assets/mario.jpg',0)
+    mario64 =  cv2.imread('assets/mario.jpg')
+    mario =  cv2.imread('assets/mario.jpg',0)
     marioName = cv2.imread('assets/marioName.jpg',0)
     h, w = marioName.shape
 
@@ -50,10 +78,8 @@ def detecImg():
             local = min_loc
         else:
             local = max_loc
-        
         bottom_right = (local[0]+w, local[1]+h)
-        cv2.rectangle(mario2,local,bottom_right,255,5)
-        cv2.imshow(str(method),mario2)
+        cv2.rectangle(mario64,local,bottom_right,255,5)
         cv2.waitKey(0) == ord('q')
         cv2.destroyAllWindows
         
@@ -65,6 +91,7 @@ def camera():
         if ret:
             cv2.imshow('cam', frame)
 
+            #69
             if cv2.waitKey(1) == ord('q'):
                 break
         else:
@@ -110,19 +137,16 @@ def tela():
     while True:
         
         screen = pyautogui.screenshot(region=(0, 0, 1920, 1280))
-        gray_image = cv2.cvtColor(np.array(screen), cv2.COLOR_BGR2GRAY)
+        image = cv2.cvtColor(np.array(screen),0)
         
-        detecImg
+        print(find_image_position(image))
         
         if cv2.waitKey(1) == ord('q'):
             break
 
-    cv2.destroyAllWindows()
-
-def moveMouse():
-    x = 500
-    y = 500
+def moveMouse(loc):
+    x,y = loc
 
     pyautogui.moveTo(x, y)
 
-tela()
+    
