@@ -1,7 +1,18 @@
 import numpy as np
 import cv2
 import mysql.connector
+import pyautogui
+import subprocess
 
+def installAll():
+    installs = [
+    'pip install numpy',
+    'pip install opencv-python',
+    'pip install mysql-connector-python',
+    'pip install pyautogui'
+]
+    for key in installs:
+        subprocess.check_call(key)
 
 def linhas():
     mario = cv2.imread('assets/mario.jpg',0)
@@ -95,3 +106,23 @@ def connector(query,values):
     except mysql.connector.Error as error:
         print("Erro ao conectar ao banco de dados: {}".format(error))
 
+def tela():
+    while True:
+        
+        screen = pyautogui.screenshot(region=(0, 0, 1920, 1280))
+        gray_image = cv2.cvtColor(np.array(screen), cv2.COLOR_BGR2GRAY)
+        
+        detecImg
+        
+        if cv2.waitKey(1) == ord('q'):
+            break
+
+    cv2.destroyAllWindows()
+
+def moveMouse():
+    x = 500
+    y = 500
+
+    pyautogui.moveTo(x, y)
+
+tela()
